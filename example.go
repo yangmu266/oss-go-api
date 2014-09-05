@@ -179,5 +179,5 @@ func ListParts(c *oss.Client, opath, uploadId string) {
 }
 
 func main() {
-	c := oss.NewClient("storage.aliyun.com", "ACCESS_ID", "ACCESS_KEY", 10)
+	//c := oss.NewClient("storage.aliyun.com", "ACCESS_ID", "ACCESS_KEY", 10)
 }

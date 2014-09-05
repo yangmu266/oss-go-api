@@ -253,7 +253,10 @@ func (c *Client) signHeader(req *http.Request, canonicalizedResource string) {
 
 func (c *Client) doRequest(method, path, canonicalizedResource string, params map[string]string, data io.Reader) (resp *http.Response, err error) {
 	reqUrl := "http://" + c.Host + path
-	req, _ := http.NewRequest(method, reqUrl, data)
+	req, err := http.NewRequest(method, reqUrl, data)
+    if err != nil {
+        fmt.Println(err)
+    }
 	date := time.Now().UTC().Format("Mon, 02 Jan 2006 15:04:05 GMT")
 	req.Header.Set("Date", date)
 	req.Header.Set("Host", c.Host)
@@ -486,6 +489,37 @@ func (c *Client) PutObject(opath string, filepath string) (err error) {
 	}
 	defer fh.Close()
 	io.Copy(buffer, fh)
+
+	contentType := http.DetectContentType(buffer.Bytes())
+	params := map[string]string{}
+	params["Content-Type"] = contentType
+
+	resp, err := c.doRequest("PUT", opath, opath, params, buffer)
+	if err != nil {
+		return
+	}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		err = errors.New(resp.Status)
+		fmt.Println(string(body))
+		return
+	}
+	return
+}
+
+//Upload object by its remote path and local file path. The format of remote path is "/bucketName/objectName".
+func (c *Client) PutObjectFromReader(opath string, reader io.Reader) (err error) {
+	if strings.HasPrefix(opath, "/") == false {
+		opath = "/" + opath
+	}
+
+	//reqUrl := "http://" + c.Host + opath
+	buffer := new(bytes.Buffer)
+
+	io.Copy(buffer, reader)
 
 	contentType := http.DetectContentType(buffer.Bytes())
 	params := map[string]string{}
