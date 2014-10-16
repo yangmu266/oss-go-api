@@ -254,9 +254,9 @@ func (c *Client) signHeader(req *http.Request, canonicalizedResource string) {
 func (c *Client) doRequest(method, path, canonicalizedResource string, params map[string]string, data io.Reader) (resp *http.Response, err error) {
 	reqUrl := "http://" + c.Host + path
 	req, err := http.NewRequest(method, reqUrl, data)
-    if err != nil {
-        fmt.Println(err)
-    }
+	if err != nil {
+		fmt.Println(err)
+	}
 	date := time.Now().UTC().Format("Mon, 02 Jan 2006 15:04:05 GMT")
 	req.Header.Set("Date", date)
 	req.Header.Set("Host", c.Host)
@@ -475,7 +475,7 @@ func (c *Client) GetObject(opath string, rangeStart, rangeEnd int) (obytes []byt
 }
 
 //Upload object by its remote path and local file path. The format of remote path is "/bucketName/objectName".
-func (c *Client) PutObject(opath string, filepath string) (err error) {
+func (c *Client) PutObject(opath string, filepath string) (etag string, err error) {
 	if strings.HasPrefix(opath, "/") == false {
 		opath = "/" + opath
 	}
@@ -506,8 +506,9 @@ func (c *Client) PutObject(opath string, filepath string) (err error) {
 		err = errors.New(resp.Status)
 		fmt.Println(string(body))
 		return
+	} else {
+		etag = resp.Header["Etag"][0]
 	}
-	fmt.Println(string(body))
 	return
 }
 
