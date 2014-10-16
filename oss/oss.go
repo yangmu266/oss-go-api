@@ -507,6 +507,7 @@ func (c *Client) PutObject(opath string, filepath string) (err error) {
 		fmt.Println(string(body))
 		return
 	}
+	fmt.Println(string(body))
 	return
 }
 
