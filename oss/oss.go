@@ -513,7 +513,7 @@ func (c *Client) PutObject(opath string, filepath string) (etag string, err erro
 }
 
 //Upload object by its remote path and local file path. The format of remote path is "/bucketName/objectName".
-func (c *Client) PutObjectFromReader(opath string, reader io.Reader) (err error) {
+func (c *Client) PutObjectFromReader(opath string, reader io.Reader) (etag string, err error) {
 	if strings.HasPrefix(opath, "/") == false {
 		opath = "/" + opath
 	}
@@ -539,6 +539,8 @@ func (c *Client) PutObjectFromReader(opath string, reader io.Reader) (err error)
 		err = errors.New(resp.Status)
 		fmt.Println(string(body))
 		return
+	} else {
+		etag = resp.Header["Etag"][0]
 	}
 	return
 }
