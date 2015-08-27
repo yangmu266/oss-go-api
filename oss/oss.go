@@ -43,6 +43,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -441,6 +442,28 @@ func (c *Client) DeleteObject(opath string) (err error) {
 		fmt.Println(string(body))
 	}
 	return
+}
+
+// Get object's signed url with the expiration time.
+func (c *Client) GetObjectSignURL(opath string, timeout time.Duration) (*url.URL, error) {
+	u, err := url.Parse("http://" + c.Host + opath)
+	if err != nil {
+		return nil, err
+	}
+	expire_date := strconv.FormatInt(time.Now().Add(timeout).Unix(), 10)
+	signStr := "GET" + "\n" + "" + "\n" + "" + "\n" + expire_date + "\n" + "" + opath
+	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(c.AccessKey)) //sha1.New()
+	io.WriteString(h, signStr)
+	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	params := url.Values{
+		"OSSAccessKeyId": []string{c.AccessID},
+		"Expires":        []string{expire_date},
+		"Signature":      []string{signedStr},
+	}
+	u.RawQuery = params.Encode()
+	u.Path = opath
+	return u, nil
 }
 
 //Download object by its path. The format of path is "/bucketName/objectName".
