@@ -596,10 +596,6 @@ func (c *Client) HeadCodeObject(opath string) (code int, header http.Header, err
 	}
 
 	code = resp.StatusCode
-	if resp.StatusCode != 200 {
-		err = errors.New(resp.Status)
-		return
-	}
 	header = resp.Header
 	return
 }
