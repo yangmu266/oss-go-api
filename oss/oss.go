@@ -586,6 +586,20 @@ func (c *Client) HeadObject(opath string) (header http.Header, err error) {
 	return
 }
 
+func (c *Client) HeadCodeObject(opath string) (code int, header http.Header, err error) {
+	if strings.HasPrefix(opath, "/") == false {
+		opath = "/" + opath
+	}
+	resp, err := c.doRequest("HEAD", opath, opath, nil, nil)
+	if err != nil {
+		return
+	}
+
+	code = resp.StatusCode
+	header = resp.Header
+	return
+}
+
 type deleteObj struct {
 	//XMLName xml.Name	`xml:"Object"`
 	Key string
